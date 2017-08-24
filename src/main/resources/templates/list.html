@@ -10,34 +10,28 @@
 <div class="container">
 <h3>Messages</h3>
 
-    <div class="row">
-        <table class="table">
-            <tr>
-                <th>
-                    Image
-                </th>
-                <th>
-                    Message
-                </th>
 
-                <th>
-                    Actions
-                </th>
-            </tr>
+
         <th:block th:each="message: ${messages}">
-            <tr>
-                <td><div th:if="${message.image}!=null"> <img th:src="${message.image}" height="100" width="100" /></div></td>
-            <td th:utext="${message.content}"> <br />
-                </td>
-            <td>
+            <h3><p style="line-height:25pt;"> <div th:utext="${message.content}" ><br /></div>
+
+                </p></h3>
+
+                <div th:if="${message.image}!=null"> <img th:src="${message.image}" height="100" width="100" />
+                </div>
+
+                from <span th:text="${message.sentby}"></span><br/>
+
+
+
                 <a th:href="@{/update/{id}(id=${message.id})}">Update</a>-
                 <a th:href="@{/detail/{id}(id=${message.id})}">Details</a>-
                 <a th:href="@{/delete/{id}(id=${message.id})}">Delete</a>
-            </td>
-            </tr>
+
+
         </th:block>
-        </table>
-    </div>
+
+
 
 </div>
 
