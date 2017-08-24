@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="www.thymeleaf.org">
+<head>
+    <div th:replace="base :: head"></div>
+</head>
+<body>
+<th:block th:replace="base :: navbar"></th:block>
+<br /><br /><br />
+
+<div class="container">
+Content: <span th:text="${message.content}"></span><br />
+Posted Date: <span th:text="${message.posteddate}"></span><br />
+Sent By: <span th:text="${message.sentby}"></span><br />
+</div>
+</body>
+</html>
