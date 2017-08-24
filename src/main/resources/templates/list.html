@@ -14,14 +14,19 @@
         <table class="table">
             <tr>
                 <th>
+                    Image
+                </th>
+                <th>
                     Message
                 </th>
+
                 <th>
                     Actions
                 </th>
             </tr>
         <th:block th:each="message: ${messages}">
             <tr>
+                <td><div th:if="${message.image}!=null"> <img th:src="${message.image}" height="100" width="100" /></div></td>
             <td th:utext="${message.content}"> <br />
                 </td>
             <td>

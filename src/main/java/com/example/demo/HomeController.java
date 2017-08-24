@@ -1,13 +1,17 @@
 package com.example.demo;
 
+import com.cloudinary.utils.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.io.IOException;
 import java.util.Calendar;
+import java.util.Map;
 
 @Controller
 public class HomeController {
@@ -15,6 +19,8 @@ public class HomeController {
     MessageRepository messageRepository;
     @Autowired
     private UserService userService;
+    @Autowired
+    CloudinaryConfig cloudc;
 
     @RequestMapping(value="/register", method= RequestMethod.GET)
     public String showRegistrationPage(Model model){
@@ -54,14 +60,28 @@ public class HomeController {
     }
 
     @PostMapping("/process")
-    public String processForm(@Valid Message message, BindingResult result) {
+    public String processForm(@Valid Message message, BindingResult result, @RequestParam("file") MultipartFile file) {
         if (result.hasErrors()) {
             return "messageform";
         }
-        Calendar calendar = Calendar.getInstance();
-        java.sql.Date ourJavaDateObject = new java.sql.Date(calendar.getTime().getTime());
-        message.setPosteddate(ourJavaDateObject);
-        messageRepository.save(message);
+        if (file.isEmpty()){
+            return "redirect:/add";
+        }
+        try {
+            Map uploadResult=cloudc.upload(file.getBytes(), ObjectUtils.asMap("resourcetype","auto"));
+            message.setImage(uploadResult.get("url").toString());
+         //  String filename= cloudc.createUrl(uploadResult.get("url").toString(),30,40,"scale");
+           // message.setImage(filename);
+            Calendar calendar = Calendar.getInstance();
+            java.sql.Date ourJavaDateObject = new java.sql.Date(calendar.getTime().getTime());
+            message.setPosteddate(ourJavaDateObject);
+            messageRepository.save(message);
+
+        } catch(IOException e){
+            e.printStackTrace();
+            return "redirect:/add";
+        }
+
         return "redirect:/";
 
     }
