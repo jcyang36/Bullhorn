@@ -64,9 +64,7 @@ public class HomeController {
         if (result.hasErrors()) {
             return "messageform";
         }
-        if (file.isEmpty()){
-            return "redirect:/add";
-        }
+
         try {
             Map uploadResult=cloudc.upload(file.getBytes(), ObjectUtils.asMap("resourcetype","auto"));
             message.setImage(uploadResult.get("url").toString());
