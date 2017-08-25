@@ -2,19 +2,25 @@ package com.example.demo;
 
 import com.cloudinary.utils.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.IOException;
+import java.security.Principal;
 import java.util.Calendar;
 import java.util.Map;
 
 @Controller
 public class HomeController {
+    @Autowired
+    UserRepository userRepository;
     @Autowired
     MessageRepository messageRepository;
     @Autowired
@@ -53,47 +59,95 @@ public class HomeController {
         return "list";
     }
 
-    @GetMapping("/add")
-    public String messageForm(Model model) {
+    @GetMapping("/addimage")
+    public String messageFormImage(Model model) {
         model.addAttribute("message", new Message());
-        return "messageform";
+        return "messageformimage";
     }
+    @GetMapping("/addtext")
+    public String messageFormText(Model model) {
+        model.addAttribute("message", new Message());
+        return "messageformtext";
+    }
+   /* @RequestMapping(method = RequestMethod.POST, value = "/object")
+    ResponseEntity<Object> create(@RequestParam("is_file") boolean isFile, HttpServletRequest request) {
+        if (isFile) {
+            MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
+            MultipartFile file = multipartRequest.getFile("file");
+        } else {
+            System.out.println("no file");
+        }
+        return null;
+    }*/
 
-    @PostMapping("/process")
-    public String processForm(@Valid Message message, BindingResult result, @RequestParam("file") MultipartFile file) {
+
+   /* ProcessFormImage  */
+   @PostMapping("/processformimage")
+    public String processFormImage(@ModelAttribute Message message, @RequestParam("file") MultipartFile file, Principal principal) {
+        if (file.isEmpty()) {
+            return "redirect:/addimage";
+        }
+
+       try {
+           Map uploadResult=cloudc.upload(file.getBytes(), ObjectUtils.asMap("resourcetype","auto"));
+           message.setImage(uploadResult.get("url").toString());
+           messageRepository.save(message);
+
+       } catch(IOException e){
+           e.printStackTrace();
+           return "redirect:/processformimage";
+       }
+
+        Calendar calendar = Calendar.getInstance();
+        java.sql.Date ourJavaDateObject = new java.sql.Date(calendar.getTime().getTime());
+        String username = principal.getName();
+        User user_current = userRepository.findByUsername(username);
+        message.setUser(user_current);
+        message.setSentby(message.getUser().getUsername());
+        message.setPosteddate(ourJavaDateObject);
+        messageRepository.save(message);
+
+        return "redirect:/";
+
+    }
+/*ProcessFormImage*/
+/* ProcessFormText*/
+    @PostMapping("/processformtext")
+    public String processFormText(@Valid Message message, BindingResult result, Principal principal) {
         if (result.hasErrors()) {
-            return "messageform";
+            return "messageformtext";
         }
 
-        try {
-            Map uploadResult=cloudc.upload(file.getBytes(), ObjectUtils.asMap("resourcetype","auto"));
-            message.setImage(uploadResult.get("url").toString());
-         //  String filename= cloudc.createUrl(uploadResult.get("url").toString(),30,40,"scale");
-           // message.setImage(filename);
-            Calendar calendar = Calendar.getInstance();
-            java.sql.Date ourJavaDateObject = new java.sql.Date(calendar.getTime().getTime());
-            message.setPosteddate(ourJavaDateObject);
-            messageRepository.save(message);
 
-        } catch(IOException e){
-            e.printStackTrace();
-            return "redirect:/add";
-        }
+        Calendar calendar = Calendar.getInstance();
+        java.sql.Date ourJavaDateObject = new java.sql.Date(calendar.getTime().getTime());
+        String username = principal.getName();
+        User user_current = userRepository.findByUsername(username);
+        message.setUser(user_current);
+        message.setSentby(message.getUser().getUsername());
+        message.setPosteddate(ourJavaDateObject);
+        messageRepository.save(message);
 
         return "redirect:/";
 
     }
 
+    /* ProcessFormText*/
     @RequestMapping("/detail/{id}")
     public String showMessage(@PathVariable("id") long id, Model model){
         model.addAttribute("message",messageRepository.findOne(id));
         return "show";
     }
-
-    @RequestMapping("/update/{id}")
-    public String updateMessage(@PathVariable("id") long id, Model model){
+    @RequestMapping("/edittextmessage/{id}")
+    public String editTextMessage(@PathVariable("id") long id, Model model){
         model.addAttribute("message",messageRepository.findOne(id));
-        return "messageform";
+        return "messageformtext";
+    }
+
+    @RequestMapping("/editimagemessage/{id}")
+    public String editImageMessage(@PathVariable("id") long id, Model model){
+        model.addAttribute("message",messageRepository.findOne(id));
+        return "messageformimage";
     }
     @RequestMapping("/delete/{id}")
     public String delCourse(@PathVariable("id") long id, Model model){

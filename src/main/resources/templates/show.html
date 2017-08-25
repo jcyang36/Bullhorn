@@ -2,17 +2,25 @@
 <html lang="en" xmlns:th="www.thymeleaf.org">
 <head>
     <div th:replace="base :: head"></div>
+    <style>
+        .content {
+            max-width: 500px;
+            margin: auto;
+        }
+    </style>
 </head>
 <body>
 <th:block th:replace="base :: navbar"></th:block>
 <br /><br /><br />
 
 <div class="container">
+    <div class="content">
     <h3>Message Details</h3>
 Content: <span th:text="${message.content}"></span><br />
     Image:  <div th:if="${message.image}!=null"> <img th:src="${message.image}" height="100" width="100" /></div><br />
 Posted Date: <span th:text="${message.posteddate}"></span><br />
 Sent By: <span th:text="${message.sentby}"></span><br />
+    </div>
 </div>
 </body>
 </html>

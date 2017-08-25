@@ -2,17 +2,24 @@
 <html lang="en" xmlns:th="www.thymeleaf.org">
 <head>
     <th:block th:replace="base :: head"></th:block>
+    <style>
+        .content {
+            max-width: 500px;
+            margin: auto;
+        }
+    </style>
 </head>
 <body>
 <div th:replace="base :: navbar"></div>
 <br /><br /><br />
 
 <div class="container">
+    <div class="content">
     <h3>Add Message</h3>
 <form action="#"
-      th:action="@{/process}"
+      th:action="@{/processformtext}"
       th:object="${message}"
-      method="post" enctype="multipart/form-data">
+      method="post" >
     <input type="hidden" th:field="*{id}"/>
 
     Content: <textarea rows="3" th:field="*{content}"/>
@@ -20,13 +27,9 @@
           th:errors="*{content}"></span> <br />
 
 
-    Image: <input type="file" name="file" /> <br /><br />
-    Sent By :<input type ="text" th:field="*{sentby}"/>
-    <span th:if="${#fields.hasErrors('sentby')}"
-          th:errors="*{sentby}"></span>
-    <br />
     <input type="submit" value="Submit" />
 </form>
+    </div>
 </div>
 </body>
 </html>
